@@ -18,10 +18,8 @@ export default async function (fastify, options) {
     });
 
     return fastify.register(
-        controller(
-            Role,
-            ['GET', 'POST', 'PATCH', 'DELETE'],
-            async (request, reply) => {
+        controller(Role, ['GET', 'POST', 'PATCH', 'DELETE'], {
+            bodyCheck: async (request, reply) => {
                 const id = request.params[Role.idParam];
                 let permissions;
 
@@ -37,7 +35,7 @@ export default async function (fastify, options) {
                     throw error;
                 }
             },
-            async (request, reply) => {
+            deleteProcess: async (request, reply) => {
                 const id = request.params[Role.idParam];
                 const role = await Role.findById(id).exec();
 
@@ -57,6 +55,6 @@ export default async function (fastify, options) {
                     )
                 );
             }
-        )
+        })
     );
 }
