@@ -1,0 +1,17 @@
+{
+    "name": "api-base",
+    "version": "1.0.0",
+    "description": "Base version of an API using Mongoose and Fastify.",
+    "main": "index.js",
+    "author": "Lucas Petitjean",
+    "license": "MIT",
+    "dependencies": {
+        "@fastify/cors": "8.3.0",
+        "@fastify/helmet": "11.1.0",
+        "@fastify/jwt": "7.2.1",
+        "@fastify/rate-limit": "8.0.3",
+        "fastify": "4.23.2",
+        "mongoose": "7.5.1"
+    },
+    "type": "module"
+}
