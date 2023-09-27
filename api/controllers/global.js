@@ -83,11 +83,10 @@ export const deleteDocument = Model => async (request, reply) => {
  * Generate controller plugin.
  * @param {import('mongoose').Model} Model - Model this controller will be for.
  * @param {("GET"|"POST"|"PATCH"|"DELETE")[]} methods - Available methods.
- * @param {import('fastify').RouteHandler} [bodyCheck] - Middleware to verify the body on POST and PATCH operations.
- * @param {import('fastify').RouteHandler} [deleteProcess] - Middleware to verify and process DELETE operations.
+ * @param {{ getQuery?: Object.<string, string|number|boolean>, bodyCheck?: import('fastify').RouteHandler, deleteProcess?: import('fastify').RouteHandler }} [options] - Additional options for the processing.
  * @returns {import('fastify').FastifyPluginAsync}
  */
-export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], bodyCheck, deleteProcess) =>
+export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {}) =>
     async (fastify, options) => {
         const readPermission = methods.indexOf('GET') === -1 ? undefined : Model.permissions.find(p => p.startsWith('read:'));
         const createPermission = methods.indexOf('POST') === -1 ? undefined : Model.permissions.find(p => p.startsWith('create:'));
@@ -97,7 +96,7 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], bodyCheck, 
         if (readPermission) {
             fastify.get('/', async (request, reply) => {
                 await authorize(request, readPermission);
-                return getCollection(Model)(request, reply);
+                return getCollection(Model, options.getQuery)(request, reply);
             });
         }
 
@@ -105,8 +104,8 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], bodyCheck, 
             fastify.post('/', { schema: Model.fastifySchema }, async (request, reply) => {
                 await authorize(request, createPermission);
 
-                if (typeof bodyCheck === 'function') {
-                    await bodyCheck(request, reply);
+                if (typeof options.bodyCheck === 'function') {
+                    await options.bodyCheck(request, reply);
                 }
 
                 return postToCollection(Model, Model.editableProperties)(request, reply);
@@ -127,8 +126,8 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], bodyCheck, 
                     await parsePermissions(request, Model.idParam);
                     await authorize(request, updatePermission);
 
-                    if (typeof bodyCheck === 'function') {
-                        await bodyCheck(request, reply);
+                    if (typeof options.bodyCheck === 'function') {
+                        await options.bodyCheck(request, reply);
                     }
 
                     return updateDocument(Model, Model.editableProperties)(request, reply);
@@ -140,8 +139,8 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], bodyCheck, 
                     await parsePermissions(request, Model.idParam);
                     await authorize(request, deletePermission);
 
-                    if (typeof deleteProcess === 'function') {
-                        await deleteProcess(request, reply);
+                    if (typeof options.deleteProcess === 'function') {
+                        await options.deleteProcess(request, reply);
                     }
 
                     return deleteDocument(Model)(request, reply);
