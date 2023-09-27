@@ -18,8 +18,6 @@ const userSchema = new mongoose.Schema(
 
             propertiesPermissions: Object.entries({
                 _id: [],
-                username: [],
-                discord_id: [],
                 roles: ['read:role']
             }),
 
