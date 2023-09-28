@@ -83,7 +83,7 @@ export const deleteDocument = Model => async (request, reply) => {
  * Generate controller plugin.
  * @param {import('mongoose').Model} Model - Model this controller will be for.
  * @param {("GET"|"POST"|"PATCH"|"DELETE")[]} methods - Available methods.
- * @param {{ getQuery?: Object.<string, string|number|boolean>, bodyCheck?: import('fastify').RouteHandler, deleteProcess?: import('fastify').RouteHandler }} [options] - Additional options for the processing.
+ * @param {{ getQuery?: Object.<string, string|number|boolean>|(request: import('fastify').FastifyRequest) => Object.<string, string|number|boolean>, bodyCheck?: import('fastify').RouteHandler, deleteProcess?: import('fastify').RouteHandler }} [options] - Additional options for the processing.
  * @returns {import('fastify').FastifyPluginAsync}
  */
 export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {}) =>
