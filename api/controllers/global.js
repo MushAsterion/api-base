@@ -96,7 +96,7 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
         if (readPermission) {
             fastify.get('/', async (request, reply) => {
                 await authorize(request, readPermission);
-                return getCollection(Model, options.getQuery)(request, reply);
+                return getCollection(Model, typeof options.getQuery === 'function' ? options.getQuery(request) : options.getQuery)(request, reply);
             });
         }
 
