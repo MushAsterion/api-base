@@ -59,7 +59,7 @@ function hasPermission(permissionsToReview, notId) {
  * @returns {Object.<string, *>}
  */
 function toJSON(document) {
-    const json = document.toJSON();
+    const json = { ...document.toJSON() };
 
     const Model = document.constructor;
     const properties = (Model.propertiesPermissions || []).filter(p => this.allowed(p[1]));
