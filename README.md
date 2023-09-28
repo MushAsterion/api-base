@@ -128,30 +128,33 @@ const exampleModelSchema = new mongoose.Schema(
 );
 ```
 
-New models must be created from the retourned `mongoose` instance.
+New models must be created from the `mongoose` instance.
 
 ```JavaScript
 import { mongoose } from 'api-base';
 mongoose.model('Example', exampleModelSchema)
-
-// OR
-
-app.mongoose.model('Example', exampleModelSchema)
 ```
 
 # Extending base models
 
-Base models can be extended by editing schema from the retourned `mongoose` instance as in:
+Base models can be extended by editing as follows
 
 ```JavaScript
-const User = app.mongoose.models.Users;
+import { mongoose } from 'api-base';
+
+const User = mongoose.models.Users;
+
 const userSchema = User.schema;
-userSchema.add({
-    username: {
-        type: app.mongoose.SchemaTypes.String,
-        default: ''
-    }
+userSchema.obj.username = {
+    type: mongoose.SchemaTypes.String,
+    default: ''
+};
+
+const propertiesPermissions = Object.entries({
+    ...Object.fromEntries(userSchema.statics.propertiesPermissions),
+    username: []
 });
 
-User.syncIndexes();
+userSchema.statics.propertiesPermissions = propertiesPermissions;
+User.propertiesPermissions = propertiesPermissions;
 ```
