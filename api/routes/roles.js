@@ -55,6 +55,7 @@ export default async function (fastify, options) {
                     )
                 );
             }
-        })
+        }),
+        options
     );
 }

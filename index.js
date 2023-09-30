@@ -55,5 +55,8 @@ export { parsePermissions, authorize, request, GET, POST, PATCH, DELETE };
 
 import system, { getCollection, postToCollection, getDocument, updateDocument, deleteDocument } from './api/controllers/system.js';
 import controller, { getCollection as getCollectionController, postToCollection as postToCollectionController, getDocument as getDocumentController, updateDocument as updateDocumentController, deleteDocument as deleteDocumentController } from './api/controllers/global.js';
+import recordsController from './api/routes/records.js';
+import rolesController from './api/routes/roles.js';
+import usersController from './api/routes/users.js';
 
-export { system, getCollection, postToCollection, getDocument, updateDocument, deleteDocument, controller, getCollectionController, postToCollectionController, getDocumentController, updateDocumentController, deleteDocumentController };
+export { system, getCollection, postToCollection, getDocument, updateDocument, deleteDocument, controller, getCollectionController, postToCollectionController, getDocumentController, updateDocumentController, deleteDocumentController, recordsController, rolesController, usersController };
