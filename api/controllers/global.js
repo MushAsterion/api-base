@@ -87,16 +87,20 @@ export const deleteDocument = Model => async (request, reply) => {
  * @returns {import('fastify').FastifyPluginAsync}
  */
 export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {}) =>
-    async (fastify, options) => {
+    async (fastify, opts) => {
         const readPermission = methods.indexOf('GET') === -1 ? undefined : Model.permissions.find(p => p.startsWith('read:'));
         const createPermission = methods.indexOf('POST') === -1 ? undefined : Model.permissions.find(p => p.startsWith('create:'));
         const updatePermission = methods.indexOf('PATCH') === -1 ? undefined : Model.permissions.find(p => p.startsWith('update:'));
         const deletePermission = methods.indexOf('DELETE') === -1 ? undefined : Model.permissions.find(p => p.startsWith('delete:'));
 
+        const getQuery = opts.getQuery || options.getQuery;
+        const bodyCheck = opts.bodyCheck || options.bodyCheck;
+        const deleteProcess = opts.deleteProcess || options.deleteProcess;
+
         if (readPermission) {
             fastify.get('/', async (request, reply) => {
                 await authorize(request, readPermission);
-                return getCollection(Model, typeof options.getQuery === 'function' ? options.getQuery(request) : options.getQuery)(request, reply);
+                return getCollection(Model, typeof getQuery === 'function' ? getQuery(request) : getQuery)(request, reply);
             });
         }
 
@@ -104,8 +108,8 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
             fastify.post('/', { schema: Model.fastifySchema }, async (request, reply) => {
                 await authorize(request, createPermission);
 
-                if (typeof options.bodyCheck === 'function') {
-                    await options.bodyCheck(request, reply);
+                if (typeof bodyCheck === 'function') {
+                    await bodyCheck(request, reply);
                 }
 
                 return postToCollection(Model, Model.editableProperties)(request, reply);
@@ -126,8 +130,8 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
                     await parsePermissions(request, Model.idParam);
                     await authorize(request, updatePermission);
 
-                    if (typeof options.bodyCheck === 'function') {
-                        await options.bodyCheck(request, reply);
+                    if (typeof bodyCheck === 'function') {
+                        await bodyCheck(request, reply);
                     }
 
                     return updateDocument(Model, Model.editableProperties)(request, reply);
@@ -139,8 +143,8 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
                     await parsePermissions(request, Model.idParam);
                     await authorize(request, deletePermission);
 
-                    if (typeof options.deleteProcess === 'function') {
-                        await options.deleteProcess(request, reply);
+                    if (typeof deleteProcess === 'function') {
+                        await deleteProcess(request, reply);
                     }
 
                     return deleteDocument(Model)(request, reply);
