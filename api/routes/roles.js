@@ -54,8 +54,8 @@ export default async function (fastify, options) {
                         })
                     )
                 );
-            }
-        }),
-        options
+            },
+            getQuery: options.getQuery
+        })
     );
 }
