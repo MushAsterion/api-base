@@ -99,7 +99,7 @@ const exampleModelSchema = new mongoose.Schema(
             // Permissions for this Model
             permissions: [],
 
-            // Properties that can be edited from POST/PATCH requests
+            // Properties that can be edited from POST/PATCH requests. Can be a string or an object of form {name: string, permissions: string|string[]}
             editableProperties: [],
 
             // Permissions required to get a property when performing GET request. If a property is not here, it will not be retourned from GET requests and if the array is empty it means that no permissions are required.
