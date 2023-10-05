@@ -20,13 +20,13 @@ export const getCollection = (Model, query) => async (request, reply) => {
 /**
  * Generate a route handler for POST requests over a collection.
  * @param {import('mongoose').Model} Model - Model to post to.
- * @param {(string|{name: string, permissions: string|string[]})[]} properties - Properties to get from the request body to generate the new document.
+ * @param {(string|{ name: string, permissions: string|string[]|(request: import('fastify').FastifyRequest) => boolean })[]} properties - Properties to get from the request body to generate the new document.
  * @returns {import('fastify').RouteHandler}
  */
 export const postToCollection = (Model, properties) => async (request, reply) => {
     await verifyUniqueness(Model, request.params[Model.idParam], Model.uniqueProperties)(request, reply);
 
-    const document = await system.postToCollection(request.userData.auth.user?._id, Model, Object.fromEntries(properties.filter(p => (p?.permissions ? request.userData.auth.allowed(p.permissions) : p)).map(p => [p?.name || p, request.body[p?.name || p]])));
+    const document = await system.postToCollection(request.userData.auth.user?._id, Model, Object.fromEntries(properties.filter(p => (p?.permissions ? (typeof p.permissions === 'function' ? p.permissions(request) : request.userData.auth.allowed(p.permissions)) : p)).map(p => [p?.name || p, request.body[p?.name || p]])));
 
     return reply.send({
         statusCode: 201,
@@ -51,13 +51,13 @@ export const getDocument = Model => async (request, reply) => {
 /**
  * Generate a route handler for PATCH requests over a document.
  * @param {import('mongoose').Model} Model - Model to update the document in.
- * @param {(string|{name: string, permissions: string|string[]})[]} properties - Properties to update from the request body.
+ * @param {(string|{ name: string, permissions: string|string[]|(request: import('fastify').FastifyRequest) => boolean })[]} properties - Properties to update from the request body.
  * @returns {import('fastify').RouteHandler}
  */
 export const updateDocument = (Model, properties) => async (request, reply) => {
     await verifyUniqueness(Model, request.params[Model.idParam], Model.uniqueProperties)(request, reply);
 
-    const document = await system.updateDocument(request.userData.auth.user?._id, Model, request.params[Model.idParam], Object.fromEntries(properties.filter(p => (p?.permissions ? request.userData.auth.allowed(p.permissions) : p)).map(p => [p?.name || p, request.body[p?.name || p]])));
+    const document = await system.updateDocument(request.userData.auth.user?._id, Model, request.params[Model.idParam], Object.fromEntries(properties.filter(p => (p?.permissions ? (typeof p.permissions === 'function' ? p.permissions(request) : request.userData.auth.allowed(p.permissions)) : p)).map(p => [p?.name || p, request.body[p?.name || p]])));
 
     return reply.send({
         statusCode: 200,
