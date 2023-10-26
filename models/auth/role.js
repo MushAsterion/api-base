@@ -4,8 +4,7 @@ const roleSchema = new mongoose.Schema(
     {
         name: {
             type: mongoose.SchemaTypes.String,
-            required: true,
-            unique: true
+            required: true
         },
         resource: {
             type: mongoose.SchemaTypes.ObjectId,
@@ -23,8 +22,6 @@ const roleSchema = new mongoose.Schema(
             permissions: ['read:role', 'create:role', 'update:role', 'delete:role'],
 
             editableProperties: ['name', 'resource', 'permissions'],
-
-            uniqueProperties: ['name'],
 
             propertiesPermissions: Object.entries({
                 _id: [],
