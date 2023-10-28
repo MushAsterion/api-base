@@ -11,7 +11,8 @@ import mongoose from 'mongoose';
  *      jwt?: import('fastify').FastifyRegisterOptions<import('@fastify/jwt').FastifyJWTOptions>
  *  },
  *  authRoutes: import('fastify').FastifyPluginAsync,
- *  router?: import('fastify').FastifyPluginAsync
+ *  router?: import('fastify').FastifyPluginAsync,
+ *  disabledRoutes?: { records?: boolean, roles?: boolean, users?: boolean }
  * }} APIConfig Configuration for the API.
  */
 
