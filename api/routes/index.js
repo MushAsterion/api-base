@@ -1,4 +1,3 @@
-import User from '../../models/auth/user.js';
 import recordsRoutes from './records.js';
 import rolesRoutes from './roles.js';
 import usersRoutes from './users.js';
