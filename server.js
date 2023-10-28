@@ -34,7 +34,8 @@ export default async (config = {}) => {
     // Routes
     await server.register(routes, {
         authRoutes: config.authRoutes,
-        router: config.router
+        router: config.router,
+        disabledRoutes: config.disabledRoutes
     });
 
     return server;
