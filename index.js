@@ -40,13 +40,13 @@ export default config => {
          */
         listen: async opts => {
             if (config?.modelSchemas?.records) {
-                mongoose.model('Records', config?.modelSchemas?.records, 'records', { overwriteModels: true });
+                mongoose.model('Records', config.modelSchemas.records, 'records', { overwriteModels: true });
             }
             if (config?.modelSchemas?.roles) {
-                mongoose.model('Roles', config?.modelSchemas?.roles, 'roles', { overwriteModels: true });
+                mongoose.model('Roles', config.modelSchemas.roles, 'roles', { overwriteModels: true });
             }
             if (config?.modelSchemas?.users) {
-                mongoose.model('Users', config?.modelSchemas?.users, 'users', { overwriteModels: true });
+                mongoose.model('Users', config.modelSchemas.users, 'users', { overwriteModels: true });
             }
 
             await mongoose.connect(typeof config.db === 'string' ? config.db : config.db.uri, typeof config.db === 'string' ? undefined : config.db.options);
