@@ -56,13 +56,14 @@ function hasPermission(permissionsToReview, notId) {
 /**
  *
  * @param {import('mongoose').Document} document Document to parse.
+ * @param {(string|string[])[]} props Properties to generate the document with.
  * @returns {Object.<string, *>}
  */
-function toJSON(document) {
+function toJSON(document, props) {
     const json = { ...document.toJSON() };
 
     const Model = document.constructor;
-    const properties = (Model.propertiesPermissions || []).filter(p => this.allowed(p[1]));
+    const properties = ((props ? props.map(p => (p instanceof Array ? p : [p[0], p])) : undefined) || Model.propertiesPermissions || []).filter(p => this.allowed(p[1]));
 
     const populate = Model._populate;
     const populated = [];
