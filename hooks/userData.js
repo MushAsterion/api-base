@@ -63,7 +63,7 @@ function toJSON(document, props) {
     const json = { ...document.toJSON() };
 
     const Model = document.constructor;
-    const properties = ((props ? props.map(p => (p instanceof Array ? p : [p[0], p])) : undefined) || Model.propertiesPermissions || []).filter(p => this.allowed(p[1]));
+    const properties = ((props ? props.map(p => (p instanceof Array ? p : [p, []])) : undefined) || Model.propertiesPermissions || []).filter(p => this.allowed(p[1]));
 
     const populate = Model._populate;
     const populated = [];
