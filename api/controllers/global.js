@@ -5,12 +5,12 @@ import system from './system.js';
 /**
  * Generate a route handler for GET requests over a collection.
  * @param {import('mongoose').Model} Model - Model to get the data from.
- * @param {import('mongoose').FilterQuery<Model>} query - Query to filter the collection.
+ * @param {import('mongoose').FilterQuery<Model>|(request: import('fastify').FastifyRequest) => import('mongoose').FilterQuery<Model>} query - Query to filter the collection.
  * @param {(string|string[])[]|(request: import('fastify').FastifyRequest) => (string|string[])[]} docProperties - Properties to generate the document with.
  * @returns {import('fastify').RouteHandler}
  */
 export const getCollection = (Model, query, docProperties) => async (request, reply) => {
-    const documents = await system.getCollection(request.userData.auth.user?._id, Model, query);
+    const documents = await system.getCollection(request.userData.auth.user?._id, Model, typeof query === 'function' ? query(request) : query);
 
     return reply.send({
         statusCode: 200,
@@ -106,7 +106,7 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
         if (readPermission) {
             fastify.get('/', async (request, reply) => {
                 await authorize(request, readPermission);
-                return getCollection(Model, typeof getQuery === 'function' ? getQuery(request) : getQuery, docProperties)(request, reply);
+                return getCollection(Model, getQuery, docProperties)(request, reply);
             });
         }
 
