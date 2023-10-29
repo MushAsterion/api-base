@@ -1,4 +1,4 @@
-import Record from '../../models/system/record.js';
 import controller from '../controllers/global.js';
+import mongoose from 'mongoose';
 
-export default controller(Record, ['GET']);
+export default controller(mongoose.models.Records, ['GET']);

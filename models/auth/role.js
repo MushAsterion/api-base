@@ -1,5 +1,13 @@
 import mongoose from 'mongoose';
 
+const name = 'role';
+const Permissions = {
+    Read: `read:${name}`,
+    Create: `create:${name}`,
+    Update: `update:${name}`,
+    Delete: `delete:${name}`
+};
+
 const roleSchema = new mongoose.Schema(
     {
         name: {
@@ -19,7 +27,7 @@ const roleSchema = new mongoose.Schema(
     },
     {
         statics: {
-            permissions: ['read:role', 'create:role', 'update:role', 'delete:role'],
+            permissions: [Permissions.Read, Permissions.Create, Permissions.Update, Permissions.Delete],
 
             editableProperties: ['name', 'resource', 'permissions'],
 
@@ -42,7 +50,9 @@ const roleSchema = new mongoose.Schema(
                         permissions: { type: 'array' }
                     }
                 }
-            }
+            },
+
+            Permissions
         }
     }
 );

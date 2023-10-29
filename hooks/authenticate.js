@@ -1,4 +1,4 @@
-import User from '../models/auth/user.js';
+import mongoose from 'mongoose';
 import { parsePermissions } from '../helpers/auth.js';
 
 /** @type {import('fastify').onRequestAsyncHookHandler} */
@@ -12,7 +12,7 @@ export default async (request, reply) => {
         request.userData.auth.jwt = token;
 
         const decoded = await request.jwtVerify();
-        request.userData.auth.user = await User.findById(decoded.id).populate({ path: 'roles' }).exec();
+        request.userData.auth.user = await mongoose.models.Users.findById(decoded.id).populate({ path: 'roles' }).exec();
 
         await parsePermissions(request, '');
     } catch (err) {}

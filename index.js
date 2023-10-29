@@ -12,9 +12,18 @@ import mongoose from 'mongoose';
  *  },
  *  authRoutes: import('fastify').FastifyPluginAsync,
  *  router?: import('fastify').FastifyPluginAsync,
- *  disabledRoutes?: { records?: boolean, roles?: boolean, users?: boolean }
+ *  disabledRoutes?: { records?: boolean, roles?: boolean, users?: boolean },
+ *  modelSchemas?: { records?: mongoose.Schema, roles?: mongoose.Schema, users?: mongoose.Schema }
  * }} APIConfig Configuration for the API.
  */
+
+// Models
+
+import Role from './models/auth/role.js';
+import User from './models/auth/user.js';
+import Record from './models/system/record.js';
+
+export { mongoose, Role, User, Record };
 
 /**
  *
@@ -30,20 +39,22 @@ export default config => {
          * @returns {Promise<string>} - The address the server is listening to.
          */
         listen: async opts => {
+            if (config?.modelSchemas?.records) {
+                mongoose.model('Records', config?.modelSchemas?.records, 'records', { overwriteModels: true });
+            }
+            if (config?.modelSchemas?.roles) {
+                mongoose.model('Roles', config?.modelSchemas?.roles, 'roles', { overwriteModels: true });
+            }
+            if (config?.modelSchemas?.users) {
+                mongoose.model('Users', config?.modelSchemas?.users, 'users', { overwriteModels: true });
+            }
+
             await mongoose.connect(typeof config.db === 'string' ? config.db : config.db.uri, typeof config.db === 'string' ? undefined : config.db.options);
             const s = await server(config);
             return s.listen(opts);
         }
     };
 };
-
-// Models
-
-import Role from './models/auth/role.js';
-import User from './models/auth/user.js';
-import Record from './models/system/record.js';
-
-export { mongoose, Role, User, Record };
 
 // Helpers
 

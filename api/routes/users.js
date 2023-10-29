@@ -1,15 +1,14 @@
-import Role from '../../models/auth/role.js';
-import User from '../../models/auth/user.js';
 import controller from '../controllers/global.js';
+import mongoose from 'mongoose';
 
 const error = new Error();
 
-export default controller(User, ['GET', 'PATCH'], {
+export default controller(mongoose.models.Users, ['GET', 'PATCH'], {
     bodyCheck: async (request, reply) => {
-        const id = request.params[User.idParam];
-        const { roles } = await User.findById(id).populate('roles').exec();
+        const id = request.params[mongoose.models.Users.idParam];
+        const { roles } = await mongoose.models.Users.findById(id).populate('roles').exec();
 
-        const newRoles = await Promise.all(request.body.roles.filter(r => roles.findIndex(role => role.id === r) === -1).map(id => Role.findById(id).exec()));
+        const newRoles = await Promise.all(request.body.roles.filter(r => roles.findIndex(role => role.id === r) === -1).map(id => mongoose.models.Roles.findById(id).exec()));
         const oldRoles = roles.filter(r => request.body.roles.indexOf(r.id) === -1);
 
         const changedPermissions = [newRoles.map(r => r.permissions), oldRoles.map(r => r.permissions)].flat(Infinity);

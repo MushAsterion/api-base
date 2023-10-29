@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
-import Role from './role.js';
+
+const name = 'user';
+const Permissions = {
+    Read: `read:${name}`,
+    Create: `create:${name}`,
+    Update: `update:${name}`,
+    Delete: `delete:${name}`
+};
 
 const userSchema = new mongoose.Schema(
     {
@@ -12,13 +19,13 @@ const userSchema = new mongoose.Schema(
     },
     {
         statics: {
-            permissions: ['read:user', 'update:user'],
+            permissions: [Permissions.Read, Permissions.Update],
 
             editableProperties: ['roles'],
 
             propertiesPermissions: Object.entries({
                 _id: [],
-                roles: ['read:role']
+                roles: [mongoose.models.Roles.Permissions.Read]
             }),
 
             idParam: 'user_id',
@@ -36,8 +43,10 @@ const userSchema = new mongoose.Schema(
             /** @type {mongoose.PopulateOptions} */
             _populate: {
                 path: 'roles',
-                populate: Role._populate
-            }
+                populate: mongoose.models.Roles._populate
+            },
+
+            Permissions
         }
     }
 );

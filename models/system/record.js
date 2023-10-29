@@ -1,5 +1,13 @@
 import mongoose from 'mongoose';
 
+const name = 'record';
+const Permissions = {
+    Read: `read:${name}`,
+    Create: `create:${name}`,
+    Update: `update:${name}`,
+    Delete: `delete:${name}`
+};
+
 const recordSchema = new mongoose.Schema(
     {
         createdAt: {
@@ -37,7 +45,7 @@ const recordSchema = new mongoose.Schema(
     },
     {
         statics: {
-            permissions: ['read:record'],
+            permissions: [Permissions.Read],
 
             propertiesPermissions: Object.entries({
                 _id: [],
@@ -77,7 +85,9 @@ const recordSchema = new mongoose.Schema(
                 } catch (err) {}
 
                 return undefined;
-            }
+            },
+
+            Permissions
         }
     }
 );

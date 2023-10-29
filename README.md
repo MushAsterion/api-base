@@ -161,3 +161,5 @@ const propertiesPermissions = Object.entries({
 userSchema.statics.propertiesPermissions = propertiesPermissions;
 User.propertiesPermissions = propertiesPermissions;
 ```
+
+You can also provide a full schema directly in the configuration. Just make sure to start from the existing ones.
