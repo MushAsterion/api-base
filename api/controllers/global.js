@@ -6,7 +6,7 @@ import system from './system.js';
  * Generate a route handler for GET requests over a collection.
  * @param {import('mongoose').Model} Model - Model to get the data from.
  * @param {import('mongoose').FilterQuery<Model>} query - Query to filter the collection.
- * @param {(string|string[])[]} docProperties - Properties to generate the document with.
+ * @param {(string|string[])[]|(request: import('fastify').FastifyRequest) => (string|string[])[]} docProperties - Properties to generate the document with.
  * @returns {import('fastify').RouteHandler}
  */
 export const getCollection = (Model, query, docProperties) => async (request, reply) => {
@@ -14,7 +14,7 @@ export const getCollection = (Model, query, docProperties) => async (request, re
 
     return reply.send({
         statusCode: 200,
-        data: documents.map(d => request.userData.auth.toJSON(d))
+        data: documents.map(d => request.userData.auth.toJSON(d, typeof docProperties === 'function' ? docProperties(request) : docProperties))
     });
 };
 
@@ -22,7 +22,7 @@ export const getCollection = (Model, query, docProperties) => async (request, re
  * Generate a route handler for POST requests over a collection.
  * @param {import('mongoose').Model} Model - Model to post to.
  * @param {(string|{ name: string, permissions: string|string[]|(request: import('fastify').FastifyRequest) => boolean })[]} properties - Properties to get from the request body to generate the new document.
- * @param {(string|string[])[]} docProperties - Properties to generate the document with.
+ * @param {(string|string[])[]|(request: import('fastify').FastifyRequest) => (string|string[])[]} docProperties - Properties to generate the document with.
  * @returns {import('fastify').RouteHandler}
  */
 export const postToCollection = (Model, properties, docProperties) => async (request, reply) => {
@@ -32,14 +32,14 @@ export const postToCollection = (Model, properties, docProperties) => async (req
 
     return reply.send({
         statusCode: 201,
-        data: [request.userData.auth.toJSON(document, docProperties)]
+        data: [request.userData.auth.toJSON(document, typeof docProperties === 'function' ? docProperties(request) : docProperties)]
     });
 };
 
 /**
  * Generate a route handler for GET requests over a document.
  * @param {import('mongoose').Model} Model - Model to get the document from.
- * @param {(string|string[])[]} docProperties - Properties to generate the document with.
+ * @param {(string|string[])[]|(request: import('fastify').FastifyRequest) => (string|string[])[]} docProperties - Properties to generate the document with.
  * @returns {import('fastify').RouteHandler}
  */
 export const getDocument = (Model, docProperties) => async (request, reply) => {
@@ -47,7 +47,7 @@ export const getDocument = (Model, docProperties) => async (request, reply) => {
 
     return reply.send({
         statusCode: 200,
-        data: [request.userData.auth.toJSON(document, docProperties)]
+        data: [request.userData.auth.toJSON(document, typeof docProperties === 'function' ? docProperties(request) : docProperties)]
     });
 };
 
@@ -55,7 +55,7 @@ export const getDocument = (Model, docProperties) => async (request, reply) => {
  * Generate a route handler for PATCH requests over a document.
  * @param {import('mongoose').Model} Model - Model to update the document in.
  * @param {(string|{ name: string, permissions: string|string[]|(request: import('fastify').FastifyRequest) => boolean })[]} properties - Properties to update from the request body.
- * @param {(string|string[])[]} docProperties - Properties to generate the document with.
+ * @param {(string|string[])[]|(request: import('fastify').FastifyRequest) => (string|string[])[]} docProperties - Properties to generate the document with.
  * @returns {import('fastify').RouteHandler}
  */
 export const updateDocument = (Model, properties, docProperties) => async (request, reply) => {
@@ -65,14 +65,14 @@ export const updateDocument = (Model, properties, docProperties) => async (reque
 
     return reply.send({
         statusCode: 200,
-        data: [request.userData.auth.toJSON(document, docProperties)]
+        data: [request.userData.auth.toJSON(document, typeof docProperties === 'function' ? docProperties(request) : docProperties)]
     });
 };
 
 /**
  * Generate a route handler for DELETE requests over a document.
  * @param {import('mongoose').Model} Model - Model to delete the document from.
- * @param {(string|string[])[]} docProperties - Properties to generate the document with.
+ * @param {(string|string[])[]|(request: import('fastify').FastifyRequest) => (string|string[])[]} docProperties - Properties to generate the document with.
  * @returns {import('fastify').RouteHandler}
  */
 export const deleteDocument = (Model, docProperties) => async (request, reply) => {
@@ -80,7 +80,7 @@ export const deleteDocument = (Model, docProperties) => async (request, reply) =
 
     return reply.send({
         statusCode: 200,
-        data: [request.userData.auth.toJSON(document, docProperties)]
+        data: [request.userData.auth.toJSON(document, typeof docProperties === 'function' ? docProperties(request) : docProperties)]
     });
 };
 
@@ -88,7 +88,7 @@ export const deleteDocument = (Model, docProperties) => async (request, reply) =
  * Generate controller plugin.
  * @param {import('mongoose').Model} Model - Model this controller will be for.
  * @param {("GET"|"POST"|"PATCH"|"DELETE")[]} methods - Available methods.
- * @param {{ getQuery?: Object.<string, string|number|boolean>|(request: import('fastify').FastifyRequest) => Object.<string, string|number|boolean>, bodyCheck?: import('fastify').RouteHandler, deleteProcess?: import('fastify').RouteHandler, docProperties: (string|string[])[] }} [options] - Additional options for the processing.
+ * @param {{ getQuery?: Object.<string, string|number|boolean>|(request: import('fastify').FastifyRequest) => Object.<string, string|number|boolean>, bodyCheck?: import('fastify').RouteHandler, deleteProcess?: import('fastify').RouteHandler, docProperties: (string|string[])[]|(request: import('fastify').FastifyRequest) => (string|string[])[] }} [options] - Additional options for the processing.
  * @returns {import('fastify').FastifyPluginAsync}
  */
 export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {}) =>
@@ -98,14 +98,15 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
         const updatePermission = methods.indexOf('PATCH') === -1 ? undefined : Model.permissions.find(p => p.startsWith('update:'));
         const deletePermission = methods.indexOf('DELETE') === -1 ? undefined : Model.permissions.find(p => p.startsWith('delete:'));
 
-        const getQuery = opts.getQuery || options.getQuery;
-        const bodyCheck = opts.bodyCheck || options.bodyCheck;
-        const deleteProcess = opts.deleteProcess || options.deleteProcess;
+        const getQuery = (opts || options).getQuery;
+        const bodyCheck = (opts || options).bodyCheck;
+        const deleteProcess = (opts || options).deleteProcess;
+        const docProperties = (opts || options).docProperties;
 
         if (readPermission) {
             fastify.get('/', async (request, reply) => {
                 await authorize(request, readPermission);
-                return getCollection(Model, typeof getQuery === 'function' ? getQuery(request) : getQuery, (opts || options)?.docProperties)(request, reply);
+                return getCollection(Model, typeof getQuery === 'function' ? getQuery(request) : getQuery, docProperties)(request, reply);
             });
         }
 
@@ -117,7 +118,7 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
                     await bodyCheck(request, reply);
                 }
 
-                return postToCollection(Model, Model.editableProperties, (opts || options)?.docProperties)(request, reply);
+                return postToCollection(Model, Model.editableProperties, docProperties)(request, reply);
             });
         }
 
@@ -126,7 +127,7 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
                 fastify.get(`/:${Model.idParam}`, async (request, reply) => {
                     await parsePermissions(request, Model.idParam);
                     await authorize(request, readPermission);
-                    return getDocument(Model, (opts || options)?.docProperties)(request, reply);
+                    return getDocument(Model, docProperties)(request, reply);
                 });
             }
 
@@ -139,7 +140,7 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
                         await bodyCheck(request, reply);
                     }
 
-                    return updateDocument(Model, Model.editableProperties, (opts || options)?.docProperties)(request, reply);
+                    return updateDocument(Model, Model.editableProperties, docProperties)(request, reply);
                 });
             }
 
@@ -152,7 +153,7 @@ export default (Model, methods = ['GET', 'POST', 'PATCH', 'DELETE'], options = {
                         await deleteProcess(request, reply);
                     }
 
-                    return deleteDocument(Model, (opts || options)?.docProperties)(request, reply);
+                    return deleteDocument(Model, docProperties)(request, reply);
                 });
             }
         }
