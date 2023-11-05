@@ -60,6 +60,10 @@ function hasPermission(permissionsToReview, notId) {
  * @returns {Object.<string, *>}
  */
 function toJSON(document, props) {
+    if (!document?.toJSON) {
+        return document;
+    }
+
     const json = { ...document.toJSON() };
 
     const Model = document.constructor;
